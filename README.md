@@ -1,0 +1,4 @@
+PythonSemestralka
+=================
+
+Semestralka Brainfuck
