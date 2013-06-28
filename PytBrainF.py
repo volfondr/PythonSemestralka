@@ -143,22 +143,39 @@ class BrainFuck:
         self.user_input = self._getInput()
         self.output = ""
 
+        self._evaluate(self.code)
 
-    def _getInput():
+    def _getInput(self):
         pos = 0
-        while pos < len(self.code) and self.code[p] != '!':
-            p += 1
+        while pos < len(self.code) and self.code[pos] != '!':
+            pos += 1
 
-        if p+1 < len(self.code):
-            ret = self.code[p+1:]
-            self.code = self.code[:p]
+        if pos+1 < len(self.code):
+            ret = self.code[pos+1:]
+            self.code = self.code[:pos]
             return ret
 
-    def _evaluate():
-        loopPtr = []
+    def _getChar(self):
+        if(len(self.user_input) != 0):
+            ret = self.user_input[0]
+            self.user_input = self.user_input[1:]
+            return ret
+        else:
+            return sys.stdin.read(1)
+
+
+    def _getLoop(self, code):
+        end = 1
+        while (code[0:end].count('[') != code[0:end].count(']')):
+            end += 1
+
+        return code[1:end-1]
+
+
+    def _evaluate(self, code):
         codeptr = 0
-        while codeptr < len(self.code):
-            char = self.code[codeptr]
+        while codeptr < len(code):
+            char = code[codeptr]
 
             if char == ">":
                 self.memory_pointer += 1
@@ -187,7 +204,15 @@ class BrainFuck:
 
             if char == ",":
                 self.memory[self.memory_pointer] = ord(self._getchar())
-            if code[p] == "[":
+
+            if char == "[":
+                loop = self._getLoop(self.code[codeptr:])
+                if self.memory[self.memory_pointer] == 0:
+                    self.memory_pointer += len(loop) + 1
+                else:
+                    self._evaluate(loop)
+
+            codeptr += 1
 
 
 
@@ -195,6 +220,7 @@ class BrainFuck:
 def main():
     x = PngReader("test_data/sachovnice.png")
     print(x.rgb)
+    y = BrainFuck("test_data/hello1.b")
 
 if __name__ == '__main__':
     main()
