@@ -128,6 +128,69 @@ class PngReader():
                     upleft_pixel = up_pixel
             self.rgb += [line]
 
+class BrainFuck:
+
+    def __init__(self, data, memory = b'\x00', memory_pointer = 0):
+        self.memory = bytearray(memory)
+        self.memory_pointer = memory_pointer
+
+        try:
+            with open(data, mode = 'r') as f:
+                self.code = f.read()
+        except:
+            self.code = data
+
+        self.user_input = self._getInput()
+        self.output = ""
+
+
+    def _getInput():
+        pos = 0
+        while pos < len(self.code) and self.code[p] != '!':
+            p += 1
+
+        if p+1 < len(self.code):
+            ret = self.code[p+1:]
+            self.code = self.code[:p]
+            return ret
+
+    def _evaluate():
+        loopPtr = []
+        codeptr = 0
+        while codeptr < len(self.code):
+            char = self.code[codeptr]
+
+            if char == ">":
+                self.memory_pointer += 1
+                if len(self.memory) == self.memory_pointer:
+                    self.memory += bytearray([0])
+
+            if char == "<":
+                if self.memory_pointer != 0:
+                    self.memory_pointer -= 1
+
+            if char == "+":
+                if self.memory[self.memory_pointer] == 255:
+                    self.memory[self.memory_pointer] == 0
+                else:
+                    self.memory[self.memory_pointer] += 1
+
+            if char == "-":
+                if self.memory[self.memory_pointer] == 0:
+                    self.memory[self.memory_pointer] == 255
+                else:
+                    self.memory[self.memory_pointer] -= 1
+
+            if char == ".":
+                print(chr(self.memory[self.memory_pointer]), end=r'')
+                self.output += chr(self.memory[self.memory_pointer])
+
+            if char == ",":
+                self.memory[self.memory_pointer] = ord(self._getchar())
+            if code[p] == "[":
+
+
+
 
 def main():
     x = PngReader("test_data/sachovnice.png")
