@@ -200,6 +200,7 @@ class BrainFuck:
 
             if char == ".":
                 print(chr(self.memory[self.memory_pointer]), end=r'')
+                #print(self.memory[self.memory_pointer], end=r'')
                 self.output += chr(self.memory[self.memory_pointer])
 
             if char == ",":
@@ -208,9 +209,11 @@ class BrainFuck:
             if char == "[":
                 loop = self._getLoop(self.code[codeptr:])
                 if self.memory[self.memory_pointer] == 0:
-                    self.memory_pointer += len(loop) + 1
+                    codeptr += len(loop) + 1
                 else:
-                    self._evaluate(loop)
+                    while self.memory[self.memory_pointer] != 0:
+                        self._evaluate(loop)
+                    codeptr += len(loop) + 1
 
             codeptr += 1
 
