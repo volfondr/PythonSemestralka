@@ -85,16 +85,16 @@ class PngReader():
         pix = tuple()
         for i in range(0,3):
             p = (pix1[i] + pix2[i] - pix3[i])
-            pa = abs(p-a[i])
-            pb = abs(p-b[i])
-            pc = abs(p-c[i])
+            pa = abs(p-pix1[i])
+            pb = abs(p-pix2[i])
+            pc = abs(p-pix3[i])
 
             if(pa <= pb and pa <= pc):
-                pix += (a[i],)
+                pix += (pix1[i],)
             elif(pb <= pc):
-                pix += (b[i],)
+                pix += (pix2[i],)
             else:
-                pix += (c[i],)
+                pix += (pix3[i],)
         return pix
 
     def _getPixels(self):
@@ -111,6 +111,7 @@ class PngReader():
             line = []
             left_pix = (0,0,0)
             upleft_pix = (0,0,0)
+            up_pix = (0,0,0)
             for col in range(0, self.width):
                 pix = (data[pos], data[pos+1], data[pos+2])
                 pos += 3
@@ -118,15 +119,19 @@ class PngReader():
                     line.append(pix)
                     left_pix = pix
                 elif (filter == 1):
-                    left_pixel = self._pixPlus(pix, self.rgb[len(self.rgb)-1][column])
-                    line += [left_pixel]
+                    left_pix = self._pixPlus(left_pix, pix)
+                    line += [left_pix]
+                elif (filter == 2):
+                    left_pix = self._pixPlus(pix, self.rgb[len(self.rgb)-1][col])
+                    line += [left_pix]
                 elif (filter == 4):
-                    up_pixel = self.rgb[len(self.rgb)-1][column]
-                    current = self._pixPlus(pixel,self._peath_predictor(left_pixel, up_pixel, upleft_pixel))
+                    up_pix = self.rgb[len(self.rgb)-1][col]
+                    current = self._pixPlus(pix,self._peath_predictor(left_pix, up_pix, upleft_pix))
                     line += [current]
-                    left_pixel = current
-                    upleft_pixel = up_pixel
+                    left_pix = current
+                    upleft_pix = up_pix
             self.rgb += [line]
+
 
 class BrainFuck:
 
@@ -204,10 +209,10 @@ class BrainFuck:
                 self.output += chr(self.memory[self.memory_pointer])
 
             if char == ",":
-                self.memory[self.memory_pointer] = ord(self._getchar())
+                self.memory[self.memory_pointer] = ord(self._getChar())
 
             if char == "[":
-                loop = self._getLoop(self.code[codeptr:])
+                loop = self._getLoop(code[codeptr:])
                 if self.memory[self.memory_pointer] == 0:
                     codeptr += len(loop) + 1
                 else:
@@ -217,13 +222,87 @@ class BrainFuck:
 
             codeptr += 1
 
+class BrainLoller:
+
+    def __init__ (self, filepath):
+        self.data = self._getCode(filepath)
+        print(self.data)
+
+        self.program = BrainFuck(self.data)
+
+    def _getChar(self):
+        color = self.rgb[self.pos[0]][self.pos[1]]
+        if(color == (255,0,0)):
+            return '>'
+        if(color == (128,0,0)):
+            return '<'
+        if(color == (0,255,0)):
+            return '+'
+        if(color == (0,128,0)):
+            return '-'
+        if(color == (0,0,255)):
+            return '.'
+        if(color == (0,0,128)):
+            return ','
+        if(color == (255,255,0)):
+            return '['
+        if(color == (128,128,0)):
+            return ']'
+        if(color == (0,255,255)):
+            self._turn(0)
+            return ""
+        if(color == (0,128,128)):
+            self._turn(1)
+            return ""
+        return ""
+
+    def _turn(self, direction):
+        if (direction == 1):
+            if((self.dir[1]+1) % 2 == 0):
+                self.dir[1] = 0
+                if((self.dir[0]+1)%2 == 0):
+                    self.dir[0] = 0
+                else:
+                    self.dir[0] = 1
+            else:
+                self.dir[1] = 1
+        else:
+            self._turn(1)
+            self._turn(1)
+            self._turn(1)
+
+    def _step(self):
+        if(self.dir[0] == 1 and self.dir[1] == 1):
+            self.pos[1] += 1
+        if(self.dir[0] == 0 and self.dir[1] == 1):
+            self.pos[1] -= 1
+        if(self.dir[0] == 1 and self.dir[1] == 0):
+            self.pos[0] += 1
+        if(self.dir[0] == 0 and self.dir[1] == 0):
+            self.pos[0] -= 1
+
+
+    def _getCode(self, filepath):
+        self.rgb = PngReader(filepath).rgb
+        print(self.rgb)
+        self.pos = [0, 0]
+        self.dir = [1, 1] #north
+        self.ret = ""
+        while True:
+            self.ret += self._getChar()
+            self._step()
+            if(self.pos[0] >= len(self.rgb) or self.pos[1] >= len(self.rgb[0]) or self.pos[0] < 0 or self.pos[1] < 0):
+                break
+        return self.ret
 
 
 
 def main():
-    x = PngReader("test_data/sachovnice.png")
-    print(x.rgb)
-    y = BrainFuck("test_data/hello1.b")
+    #x = PngReader("test_data/sachovnice.png")
+    #print(x.rgb)
+    y = BrainFuck("test_data/numwarp_input.b")
+    z = BrainLoller("test_data/HelloWorld.png")
+
 
 if __name__ == '__main__':
     main()
