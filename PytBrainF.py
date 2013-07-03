@@ -10,6 +10,8 @@
 #-------------------------------------------------------------------------------
 
 import zlib
+import sys
+
 
 class PNGWrongHeaderError(Exception):
     pass
@@ -97,6 +99,8 @@ class PngReader():
                 pix += (pix3[i],)
         return pix
 
+
+
     def _getPixels(self):
         self._checkHeader()
         self._getChunks()
@@ -166,7 +170,7 @@ class BrainFuck:
             self.user_input = self.user_input[1:]
             return ret
         else:
-            return sys.stdin.read(1)
+            return ord(sys.stdin.read(1))
 
 
     def _getLoop(self, code):
@@ -283,7 +287,6 @@ class BrainLoller:
 
     def _getCode(self, filepath):
         self.rgb = PngReader(filepath).rgb
-        print(self.rgb)
         self.pos = [0, 0]
         self.dir = [1, 1] #north
         self.ret = ""
@@ -294,7 +297,7 @@ class BrainLoller:
                 break
         return self.ret
 
-def BrainCopter(BrainLoller):
+class BrainCopter(BrainLoller):
 
     def _getChar(self):
         color = self.rgb[self.pos[0]][self.pos[1]]
@@ -303,20 +306,33 @@ def BrainCopter(BrainLoller):
         if(num < 8):
             return bf[num]
         if num == 8:
-            self_turn(0)
+            self._turn(0)
         if num == 9:
-            self_turn(1)
+            self._turn(1)
         return ""
 
 
-
-def main():
-    #x = PngReader("test_data/sachovnice.png")
-    #print(x.rgb)
-    y = BrainFuck("test_data/numwarp_input.b")
-    z = BrainLoller("test_data/HelloWorld.png")
-    c = BrainCopter()
-
-
 if __name__ == '__main__':
-    main()
+    from optparse import OptionParser
+    parser = OptionParser(usage='usage: %prog [-h] [--version] [-l] [-c] FILE', version="%prog 1.0")
+    parser.add_option('-l', '--brainloller', action='store_true', dest='loller',
+                        help='usage of the BrainLoller')
+    parser.add_option('-c', '--copter', action='store_true', dest='copter',
+                        help='usage of the BrainCopter')
+    (options, args) = parser.parse_args()
+    if len(args) < 1:
+        parser.error('too few arguments')
+    if options.copter and options.loller:
+        parser.error('options --brainloller and --braincopter are mutually exclusive')
+
+    try:
+        with open(args[0]): pass
+    except IOError:
+        parser.error(args[0]+' is not a file or it cannot be opened')
+
+    if options.loller:
+        BrainLoller(args[0])
+    elif options.copter:
+        BrainCopter(args[0])
+    else:
+        BrainFuck(args[0])

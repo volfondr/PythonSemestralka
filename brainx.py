@@ -195,3 +195,27 @@ class BrainCopter(BrainLoller):
             self_turn(1)
         return ""
 
+if __name__ == '__main__':
+    from optparse import OptionParser
+    parser = OptionParser(usage='usage: %prog [-h] [--version] [-l] [-c] FILE', version="%prog 1.0")
+    parser.add_option('-l', '--brainloller', action='store_true', dest='loller',
+                        help='usage of the BrainLoller')
+    parser.add_option('-c', '--copter', action='store_true', dest='copter',
+                        help='usage of the BrainCopter')
+    (options, args) = parser.parse_args()
+    if len(args) < 1:
+        parser.error('too few arguments')
+    if options.copter and options.loller:
+        parser.error('options --brainloller and --braincopter are mutually exclusive')
+
+    try:
+        with open(args[0]): pass
+    except IOError:
+        parser.error(args[0]+' is not a file or it cannot be opened')
+
+    if options.loller:
+        BrainLoller(args[0])
+    elif options.copter:
+        BrainCopter(args[0])
+    else:
+        BrainFuck(args[0])
